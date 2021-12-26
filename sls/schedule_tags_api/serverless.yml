@@ -1,0 +1,173 @@
+app: scheduling
+service: schedule-tags-api
+frameworkVersion: ">=1.53.0"
+
+provider:
+  name: aws
+  runtime: python3.6
+  timeout: 900
+  logs:
+    restApi: true
+  tracing:
+    apiGateway: true
+    lambda: true
+  endpointType: PRIVATE
+  region: us-east-1
+  vpcEndpointIds:
+    - ${self:custom.vpcEndpointId}
+  stage: ${self:custom.stage}
+  vpc:
+    securityGroupIds: ${self:custom.SECURITY_GROUPS}
+    subnetIds: ${self:custom.SUBNETS}
+  deploymentBucket:
+    name: ${self:custom.admin_account}-lambda-package-us-east-1
+    serverSideEncryption: AES256
+  apiGateway:
+    resourcePolicy:
+      - Effect: Allow
+        Principal: "*"
+        Action: execute-api:Invoke
+        Resource:
+          - execute-api:/*/*/*
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - sts:AssumeRole
+        - secretsmanager:GetSecretValue
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+        - rds:DescribeDBInstances
+        - ec2:DescribeRegions
+      Resource:
+        - "*"
+  environment:
+    sddcapi_boot_dir: config
+    token_url: ${self:custom.token_url}
+    app_client_id: ${self:custom.app_client_id}
+    app_secret_name: ${self:custom.app_secret_name}
+    region_secret: ${self:custom.region_secret}
+    vpcxiam_scope: ${self:custom.vpcxiam_scope}
+    vpcxiam_endpoint: ${self:custom.vpcxiam_endpoint}
+    vpcxiam_host: ${self:custom.vpcxiam_host}
+    appsync_secret: ${self:custom.appsync_secret}
+    AZURE_AUTH_CLIENT_ID: ${self:custom.AZURE_AUTH_CLIENT_ID}
+    AZURE_AUTH_SECRET_NAME: ${self:custom.AZURE_AUTH_SECRET_NAME}
+    MSFT_IDP_APP_ID: ${self:custom.MSFT_IDP_APP_ID}
+    MSFT_IDP_TENANT_ID: ${self:custom.MSFT_IDP_TENANT_ID}
+    MSFT_IDP_CLIENT_ROLES: ${self:custom.MSFT_IDP_CLIENT_ROLES}
+    LDAP_GROUP_NAME: ${self:custom.LDAP_GROUP_NAME}
+    LOG_LEVEL: ${self:custom.LOG_LEVEL}
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!schedule_tags_api/**/tests/**'
+    - '!utils/tests/**'
+    - '!scripts/**'
+
+functions:
+  get_schedule_tags:
+    handler: sls/schedule_tags_api/get_schedule_tags/index.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+         - tag:GetResources
+        Resource: "*"
+    events:
+      - http:
+          path: /v1/accounts/{account_id}/regions/{region}/{resource_type}/{resource_id}/schedule
+          method: get
+          request:
+            parameters:
+              paths:
+                account_id: true
+                region: true
+                resource_type: true
+                resource_id: true
+
+  delete_schedule_tags:
+    handler: sls/schedule_tags_api/delete_schedule_tags/index.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+         - tag:UntagResources
+        Resource: "*"
+    events:
+      - http:
+          path: /v1/accounts/{account_id}/regions/{region}/{resource_type}/{resource_id}/schedule
+          method: delete
+          request:
+            parameters:
+              paths:
+                account_id: true
+                region: true
+                resource_type: true
+                resource_id: true
+
+  put_schedule_tags:
+    handler: sls/schedule_tags_api/put_schedule_tags/index.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - tag:TagResources
+        Resource: "*"
+    events:
+      - http:
+          path: /v1/accounts/{account_id}/regions/{region}/{resource_type}/{resource_id}/schedule
+          method: put
+          request:
+            parameters:
+              paths:
+                account_id: true
+                region: true
+                resource_type: true
+                resource_id: true
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+  output:
+    file: stack-outputs.json
+  pythonRequirements:
+    dockerizePip: false
+    slim: true
+    slimPatterns:
+      - "**/*.egg-info*"
+    noDeploy: []
+    pipCmdExtraArgs:
+      - --extra-index-url=http://itsusralsp07062.test-org.com:8090
+      - --trusted-host=itsusralsp07062.test-org.com
+      - --extra-index-url https://pypi.jjapi.test-org.com/v1/itx-abp/private/dev/
+      - --extra-index-url https://pypi.jjapi.test-org.com/v1/itx-alz/shared/production/
+  stage: ${opt:stage}
+  func_prefix: ${self:service}-${self:custom.stage}
+  accountId: !Ref AWS::AccountId
+  admin_account: ${file(config/config.${opt:stage}.json):MAIN.ADMIN_ACCOUNT}
+  vpcEndpointId: ${file(config/config.${opt:stage}.json):VPCXIAM.VPCXIAM_ENDPOINT_ID}
+  vpcxiam_endpoint: ${file(config/config.${opt:stage}.json):VPCXIAM.VPCXIAM_ENDPOINT}
+  vpcxiam_host: ${file(config/config.${opt:stage}.json):VPCXIAM.VPCXIAM_HOST}
+  vpcxiam_scope: ${file(config/config.${opt:stage}.json):VPCXIAM.VPCXIAM_SCOPE}
+  token_url: ${file(config/config.common.json):ENVIRONMENT.TOKEN_URL}
+  app_client_id: ${file(config/config.${opt:stage}.json):OAUTH2.APP_CLIENT_ID}
+  app_secret_name: ${file(config/config.common.json):ENVIRONMENT.APP_SECRET_NAME}
+  appsync_secret: ${file(config/config.common.json):ENVIRONMENT.APPSYNC_SECRET_NAME}
+  region_secret: ${opt:region, self:provider.region}
+  SUBNETS: ${file(config/config.${opt:stage}.json):DEPLOYMENT.SUBNETS}
+  SECURITY_GROUPS: ${file(config/config.${opt:stage}.json):DEPLOYMENT.SECURITY_GROUPS}
+  AZURE_AUTH_CLIENT_ID: ${file(config/config.common.json):ENVIRONMENT.AZURE_AUTH_CLIENT_ID}
+  AZURE_AUTH_SECRET_NAME: ${file(config/config.common.json):ENVIRONMENT.AZURE_AUTH_SECRET_NAME}
+  MSFT_IDP_APP_ID: ${file(config/config.${opt:stage}.json):MSFT.MSFT_IDP_APP_ID}
+  MSFT_IDP_TENANT_ID: ${file(config/config.common.json):ENVIRONMENT.MSFT_IDP_TENANT_ID}
+  MSFT_IDP_CLIENT_ROLES: ${file(config/config.common.json):SCHEDULE_TAGS_API.MSFT_IDP_CLIENT_ROLES}
+  LDAP_GROUP_NAME: ${file(config/config.common.json):SCHEDULE_TAGS_API.LDAP_GROUP_NAME}
+  LOG_LEVEL: ${file(config/config.${opt:stage}.json):MAIN.LOG_LEVEL}
+
+plugins:
+  - serverless-python-requirements
+  - serverless-stack-output
+  - serverless-prune-plugin
+  - serverless-iam-roles-per-function

@@ -1,0 +1,5 @@
+.idea/
+backup/
+node_modules/
+**/__pycache__
+

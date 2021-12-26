@@ -1,0 +1,14 @@
+{
+   "ENVIRONMENT": {
+      "TOKEN_URL": "https://login.microsoftonline.com/test.onmicrosoft.com/oauth2/v2.0/token",
+      "MSFT_IDP_TENANT_ID": "3ac94b33-9135-4821-96592a35",
+      "APP_SECRET_NAME": "clx-awsapi-rds-scheduling",
+      "AZURE_AUTH_CLIENT_ID": "2339ef37-a0-8c61-0bc4ecab9b3e",
+      "AZURE_AUTH_SECRET_NAME": "clx-awsapi-azure-ad-auth",
+      "APPSYNC_SECRET_NAME": "NetBot/AppSync"
+   },
+   "SCHEDULE_TAGS_API": {
+      "MSFT_IDP_CLIENT_ROLES": "writer",
+      "LDAP_GROUP_NAME": "ITS-EP-BAPP-ITxVPCx-ITxAdmins,ITS-EP-BAPP-ITxVPCx-ITxDBAs,ITS-BEP-{project_id}-AccountOwners,ITS-BEP-{project_id}-AccountMembers"
+   }
+}

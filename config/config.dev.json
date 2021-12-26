@@ -1,0 +1,50 @@
+{
+   "DEPLOYMENT": {
+      "ACCOUNT": "itxyz-000",
+      "ACCOUNT_NUMBER": "75269271",
+      "SUBNETS": [
+         "subnet-d1b151be",
+         "subnet-ceb151a1"
+      ],
+      "SECURITY_GROUPS": [
+         "sg-8b864be4",
+         "sg-57814c38"
+      ],
+      "DEPLOYMENT_BUCKET": "itxyz-000-lambda-package-us-east-1"
+   },
+   "MAIN": {
+      "ENVIRONMENT": "dev",
+      "ADMIN_ACCOUNT": "itxyz-000",
+      "ACCOUNT": "itxyz-046",
+      "REGION": "us-east-1",
+      "LOG_LEVEL": "INFO"
+   },
+   "OAUTH2": {
+      "APPLICATION_ID": "https://clx-awsapi-rds-scheduling-dev.test.com",
+      "APPLICATION_SCOPE": "https://clx-awsapi-rds-scheduling-dev.test.com/.default",
+      "ALLOWED_URLS": ["https://clx-awsapi-rds-scheduling-dev.test.com"],
+      "APP_CLIENT_ID": "e1e77a5a5491"
+   },
+   "VPCXIAM": {
+      "VPCXIAM_ENDPOINT": "https://vpce-0127fc69-kykwwlo6.execute-api.us-east-1.vpce.amazonaws.com/dev",
+      "VPCXIAM_HOST": "pygmyi.execute-api.us-east-1.amazonaws.com",
+      "VPCXIAM_SCOPE": "https://clx-awsapi-credential-dev.test.com/.default",
+      "VPCXIAM_ENDPOINT_ID": "vpce-012427fc69"
+   },
+   "MSFT": {
+      "MSFT_IDP_APP_ID": "https://clx-awsapi-rds-scheduling-dev.test.com"
+   },
+   "BEHAVE": {
+      "VPC_ENDPOINT": "vpce-012710fc69-kykwwlo6.execute-api.us-east-1.vpce.amazonaws.com",
+      "JENKINS_SECRET_NAME": "awsapi/jenkins",
+      "JENKINS_CLIENT_ID": "https://clx-awsapi-jenkins-dev.test.com",
+      "DB_SUBNET_GROUP_NAME": "itxyz-046-dbsubnetgroupprimaryusea11-xurx2d68n9pi",
+      "DB_VPC_SECURITY_GROUP_NAME": ["sg-8f68de8", "sg-e348d84"],
+      "SUBNET_ID": "subnet-2f36776",
+      "INSTANCE_REGION": "us-east-1"
+   },
+   "TESTING": {
+      "TEST_ACCOUNT": "itxyz-046",
+      "TEST_ACCOUNT_NUMBER": "2473038"
+   }
+}
